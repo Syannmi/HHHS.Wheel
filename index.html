@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班級選擇入口 | Class Selector</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            width: 90%;
+            padding: 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        /* 按鈕樣式 */
+        .class-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .class-btn span {
+            font-size: 1rem;
+            font-weight: normal;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        /* 不同的顏色區分 */
+        .btn-1 { background: linear-gradient(135deg, #FF6B6B, #EE5253); }
+        .btn-2 { background: linear-gradient(135deg, #48DBFB, #0ABDE3); }
+        .btn-3 { background: linear-gradient(135deg, #1DD1A1, #10AC84); }
+        .btn-4 { background: linear-gradient(135deg, #Feca57, #ff9f43); }
+        .btn-5 { background: linear-gradient(135deg, #5f27cd, #341f97); }
+
+        /* 滑鼠懸停/手指按下效果 */
+        .class-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+        }
+
+        .class-btn:active {
+            transform: scale(0.98);
+        }
+
+        footer {
+            margin-top: 40px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>請選擇幸運的大寶貝班級 (Select Class)</h1>
+
+    <div class="container">
+        <a href="203.html" class="class-btn btn-1">
+            203 班
+            <span>Class 203</span>
+        </a>
+
+        <a href="204.html" class="class-btn btn-2">
+            204 班
+            <span>Class 204</span>
+        </a>
+
+        <a href="205.html" class="class-btn btn-3">
+            205 班
+            <span>Class 205</span>
+        </a>
+
+        <a href="206.html" class="class-btn btn-4">
+            206 班
+            <span>Class 206</span>
+        </a>
+
+        <a href="8th.html" class="class-btn btn-5">
+            增能班
+            <span>8th</span>
+        </a>
+    </div>
+
+    <footer>
+        English's for u & Icy pancake's for me! 🍎
+    </footer>
+
+</body>
+</html>

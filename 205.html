@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>205班大寶貝轉盤</title>
+    <style>
+        :root {
+            --main-color: #6C5CE7;
+            --accent-color: #FD79A8;
+            --bg-gradient: radial-gradient(circle at center, #2d3436 0%, #000000 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background: var(--bg-gradient);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* 背景裝飾粒子 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(white 1px, transparent 1px),
+                radial-gradient(white 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 
+                0 0 10px #6C5CE7,
+                0 0 20px #6C5CE7;
+            font-weight: 900;
+            letter-spacing: 2px;
+            transform: none; 
+            text-align: center;
+        }
+
+        .game-board {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(108, 92, 231, 0.5);
+            border: 10px solid rgba(255,255,255,0.2);
+            position: relative;
+        }
+
+        .container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            border: 15px solid #fff;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            background: white;
+        }
+
+        canvas {
+            border-radius: 50%;
+            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            display: block;
+        }
+
+        /* 現代化指針 */
+        .pointer {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+        
+        .pointer::before {
+            content: '';
+            display: block;
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-top: 60px solid #FF7675;
+        }
+        .pointer::after {
+            content: '';
+            display: block;
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            width: 30px;
+            height: 30px;
+            background: #D63031;
+            border-radius: 50%;
+            border: 5px solid white;
+        }
+
+        /* 按鈕區 */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            position: relative;
+            top: 0;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #spinBtn {
+            background-color: #00b894;
+            box-shadow: 0 6px 0 #00876c, 0 15px 20px rgba(0,0,0,0.4);
+        }
+
+        #resetBtn {
+            background-color: #0984e3;
+            box-shadow: 0 6px 0 #0762a8, 0 15px 20px rgba(0,0,0,0.4);
+        }
+
+        button:active {
+            top: 6px;
+            box-shadow: 0 0 0 #00876c, 0 0 5px rgba(0,0,0,0.4);
+        }
+        
+        #resetBtn:active {
+            box-shadow: 0 0 0 #0762a8, 0 0 5px rgba(0,0,0,0.4);
+        }
+
+        button:disabled {
+            background-color: #b2bec3;
+            box-shadow: 0 6px 0 #636e72;
+            cursor: not-allowed;
+            top: 0;
+        }
+
+        /* 設定區 */
+        .settings {
+            margin-top: 50px;
+            width: 80%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 3px solid #dfe6e9;
+            border-radius: 10px;
+            background: #f1f2f6;
+            color: #333;
+            outline: none;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        
+        textarea:focus {
+            border-color: #6C5CE7;
+        }
+
+        /* 彈跳視窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 8px solid #FDCB6E;
+            box-shadow: 0 0 50px rgba(253, 203, 110, 0.6);
+            max-width: 90%;
+            width: 500px;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        h2 {
+            color: #636e72;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        #winnerName {
+            font-size: 4rem;
+            background: -webkit-linear-gradient(#e17055, #d63031);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+            font-weight: 900;
+            filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1));
+            word-break: break-all;
+        }
+
+        .close-btn {
+            background-color: #e17055;
+            box-shadow: 0 6px 0 #bf381d;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:active {
+            box-shadow: 0 0 0 #bf381d;
+            transform: translateY(4px);
+        }
+
+        /* RWD 適應 */
+        @media (max-width: 650px) {
+            .container, canvas {
+                width: 300px;
+                height: 300px;
+            }
+            .game-board {
+                padding: 10px;
+            }
+            h1 { font-size: 2rem; }
+            #winnerName { font-size: 2.5rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>🎮 205班大寶貝轉盤 🎮</h1>
+
+    <div class="game-board">
+        <div class="container">
+            <div class="pointer"></div>
+            <canvas id="wheelCanvas" width="600" height="600"></canvas>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="spinBtn" onclick="spinWheel()">🚀 開始轉動</button>
+        <button id="resetBtn" onclick="resetList()">🔄 重置名單</button>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <h2>✨ 要回答的幸運大寶貝是... ✨</h2>
+            <div id="winnerName">學生姓名</div>
+            <button class="close-btn" onclick="closeModal()">確認並移除</button>
+        </div>
+    </div>
+
+    <div class="settings">
+        <h3>📝 玩家名單 (用逗號或換行分隔)</h3>
+        <textarea id="studentInput" oninput="updateList()">王羿程, 林郁程, 林海殷, 林毓善, 邱揚凱, 倪倪季珈, 徐啟祐, 張閎景, 梁閎耀, 陳安榆, 陳威愷, 陳彥廷, 陳彥勳, 陳郁蒲, 趙冠安, 蔡易呈, 蔡榮軒, 簡進豪, 蘇名浩, 蘇彥軒, 王佳毓, 王映晴, 安詩晴, 吳鈞怡, 李沛盈, 李孟臻, 李培蕾, 李翊瑄, 沈妍蓁, 林宥廷, 洪子淩, 張宸瑀, 陳芮妮, 陳歆霓, 曾家螢, 楊旻珉, 楊筑茵, 廖涔蓁, 劉凱茵, 鄧秀君, 廖詠婷, 石千芮, 蔡勳捷, 黃子奇</textarea>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const modal = document.getElementById('resultModal');
+        const winnerText = document.getElementById('winnerName');
+        const studentInput = document.getElementById('studentInput');
+
+        const colors = [
+            '#FF7675', '#74B9FF', '#55EFC4', '#FFEAA7', '#A29BFE', 
+            '#FD79A8', '#FAB1A0', '#81ECEC', '#00CEC9', '#6C5CE7'
+        ];
+
+        let students = [];
+        let originalStudents = []; 
+        let startAngle = 0;
+        let arc = 0;
+        let spinTimeout = null;
+        let spinAngleStart = 10;
+        let spinTime = 0;
+        let spinTimeTotal = 0;
+        let isSpinning = false;
+        
+        // --- 修正後的音效系統 ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function wakeUpAudio() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // ✨ 魔法風鈴風音效引擎
+        const soundEngine = {
+            playTick: function() {
+                const t = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                // Sine 波加上頻率上揚，像水滴或氣泡聲
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, t);
+                osc.frequency.exponentialRampToValueAtTime(800, t + 0.1);
+                
+                gain.gain.setValueAtTime(0.2, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t);
+                osc.stop(t + 0.1);
+            },
+
+            playWin: function() {
+                const t = audioCtx.currentTime;
+                // 夢幻的琶音，頻率較高，使用 Sine 波
+                // 模擬豎琴掃弦
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98, 2093.00];
+                
+                notes.forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    
+                    // 每個音稍微重疊，創造殘響感
+                    const startTime = t + (i * 0.05);
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(0.2, startTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 1.5); // 長尾音
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + 1.5);
+                });
+            }
+        };
+
+        // --- 轉盤邏輯 ---
+
+        function init() {
+            updateList();
+            drawRouletteWheel();
+        }
+
+        function updateList() {
+            if(isSpinning) return;
+            const text = studentInput.value;
+            students = text.split(/[,，\n]+/).map(s => s.trim()).filter(s => s !== "");
+            if (originalStudents.length === 0 && students.length > 0) {
+                originalStudents = [...students]; 
+            }
+            drawRouletteWheel();
+        }
+
+        function resetList() {
+            if(isSpinning) return;
+            const text = studentInput.value;
+            students = text.split(/[,，\n]+/).map(s => s.trim()).filter(s => s !== "");
+            drawRouletteWheel();
+        }
+
+        function drawRouletteWheel() {
+            if (canvas.getContext) {
+                const outsideRadius = 280;
+                const insideRadius = 60; 
+                const textRadius = (outsideRadius + insideRadius) / 2;
+
+                // 為了支援 RWD，根據 Canvas 實際寬度調整比例
+                const scale = canvas.width / 600;
+                ctx.setTransform(scale, 0, 0, scale, 0, 0);
+
+                ctx.clearRect(0, 0, 600, 600);
+                
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 4;
+                
+                ctx.font = 'bold 24px "Microsoft JhengHei", sans-serif';
+
+                if (students.length === 0) {
+                    ctx.save();
+                    ctx.font = 'bold 40px "Microsoft JhengHei"';
+                    ctx.fillStyle = "#555";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("請輸入玩家", 300, 300);
+                    ctx.restore();
+                    return;
+                }
+
+                arc = Math.PI * 2 / students.length;
+
+                for(let i = 0; i < students.length; i++) {
+                    const angle = startAngle + i * arc;
+                    
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.beginPath();
+                    ctx.arc(300, 300, outsideRadius, angle, angle + arc, false);
+                    ctx.arc(300, 300, insideRadius, angle + arc, angle, true);
+                    ctx.stroke();
+                    ctx.fill();
+
+                    ctx.save();
+                    ctx.shadowColor = "transparent";
+                    
+                    ctx.translate(300, 300);
+                    ctx.rotate(angle + arc / 2);
+                    ctx.translate(textRadius, 0);
+                    
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+
+                    const text = students[i];
+                    // 自動縮放文字以適應格子
+                    if (text.length > 5) {
+                        ctx.font = 'bold 18px "Microsoft JhengHei", sans-serif';
+                    } else {
+                        ctx.font = 'bold 24px "Microsoft JhengHei", sans-serif';
+                    }
+
+                    ctx.lineJoin = "round"; 
+                    ctx.strokeStyle = "white";
+                    ctx.lineWidth = 5; 
+                    ctx.strokeText(text, 0, 0, outsideRadius - insideRadius - 10);
+                    ctx.fillStyle = "#2d3436"; 
+                    ctx.fillText(text, 0, 0, outsideRadius - insideRadius - 10);
+                    
+                    ctx.restore();
+                } 
+            }
+        }
+
+        function spinWheel() {
+            wakeUpAudio();
+
+            if (isSpinning) return;
+            if (students.length === 0) {
+                alert("名單為空！");
+                return;
+            }
+            
+            isSpinning = true;
+            spinBtn.disabled = true;
+            
+            // --- 關鍵修正：每次開始時重置音效計時器 ---
+            lastSoundTime = 0; 
+            
+            spinAngleStart = Math.random() * 10 + 10;
+            spinTime = 0;
+            spinTimeTotal = Math.random() * 3000 + 4000;
+            rotateWheel();
+        }
+
+        let lastSoundTime = 0;
+
+        function rotateWheel() {
+            spinTime += 30;
+            if(spinTime >= spinTimeTotal) {
+                stopRotateWheel();
+                return;
+            }
+            
+            const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+            startAngle += (spinAngle * Math.PI / 180);
+            drawRouletteWheel();
+            
+            // 計算何時播放 Tick 聲音
+            // 隨著轉速變慢，間隔需要變大。這個公式模擬了物理減速
+            const progress = spinTime / spinTimeTotal;
+            // 基礎間隔 + 減速因子 (progress * progress * 200)
+            const minInterval = 50 + (progress * progress * 300);
+
+            if (spinTime - lastSoundTime > minInterval) {
+                 soundEngine.playTick();
+                 lastSoundTime = spinTime;
+            }
+            
+            spinTimeout = requestAnimationFrame(rotateWheel);
+        }
+
+        function stopRotateWheel() {
+            cancelAnimationFrame(spinTimeout);
+            
+            const degrees = startAngle * 180 / Math.PI + 90;
+            const arcd = arc * 180 / Math.PI;
+            const index = Math.floor((360 - degrees % 360) / arcd);
+            
+            ctx.save();
+            const text = students[index];
+            
+            soundEngine.playWin();
+            
+            winnerText.innerText = text;
+            setTimeout(() => {
+                modal.style.display = "flex";
+                modal.setAttribute('data-index', index);
+            }, 300); 
+            
+            isSpinning = false;
+            spinBtn.disabled = false;
+            ctx.restore();
+        }
+
+        function easeOut(t, b, c, d) {
+            const ts = (t/=d)*t;
+            const tc = ts*t;
+            return b+c*(tc + -3*ts + 3*t);
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+            const index = parseInt(modal.getAttribute('data-index'));
+            
+            if (!isNaN(index)) {
+                students.splice(index, 1);
+                drawRouletteWheel();
+            }
+        }
+
+        // 初始化
+        init();
+
+    </script>
+</body>
+</html>
